@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>网上报账服务 · 按用途分类</title>
+  <style>
+    :root {
+      --bg: #f0f2f5;
+      --panel: #ffffff;
+      --sidebar: #f7f8fa;
+      --border: #e5e6eb;
+      --text: #1d2129;
+      --muted: #86909c;
+      --blue: #165dff;
+      --blue-soft: #e8f3ff;
+      --orange: #ff7d00;
+      --section: #4e5969;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .app {
+      display: flex;
+      min-height: 100vh;
+      background: var(--panel);
+    }
+    .sidebar {
+      width: 220px;
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
+      padding: 16px 0;
+      flex-shrink: 0;
+    }
+    .side-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      font-size: 14px;
+      color: var(--text);
+      cursor: default;
+    }
+    .side-item .ico {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      background: #c9cdd4;
+      flex-shrink: 0;
+    }
+    .side-item.active {
+      color: var(--blue);
+      background: var(--blue-soft);
+      font-weight: 600;
+    }
+    .side-item.active .ico { background: var(--blue); }
+    .side-sub {
+      padding: 8px 20px 8px 46px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .side-sub.active {
+      color: var(--blue);
+      font-weight: 600;
+      background: #f2f3f5;
+    }
+    .main {
+      flex: 1;
+      padding: 20px 28px 36px;
+      overflow: auto;
+    }
+    .page-title {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+    .page-title strong { color: var(--text); font-weight: 600; }
+    .banner {
+      background: linear-gradient(90deg, #e8f3ff 0%, #f7f8fa 100%);
+      border: 1px solid #cce0ff;
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin-bottom: 22px;
+      font-size: 13px;
+      color: #3b4a6b;
+    }
+    .section {
+      margin-bottom: 28px;
+    }
+    .section-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-head .badge {
+      font-size: 11px;
+      font-weight: 600;
+      color: #fff;
+      background: var(--blue);
+      border-radius: 3px;
+      padding: 2px 7px;
+      letter-spacing: 0.5px;
+    }
+    .section-head h2 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--section);
+    }
+    .section-head .desc {
+      font-size: 12px;
+      color: var(--muted);
+      margin-left: 4px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px 12px;
+    }
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 8px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .menu-item:hover { background: #f7f8fa; }
+    .menu-item .icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .c-entry .icon { background: #165dff; }
+    .c-apply .icon { background: #0fc6c2; }
+    .c-reimburse .icon { background: #ff7d00; }
+    .c-loan .icon { background: #f53f3f; }
+    .c-query .icon { background: #722ed1; }
+    .c-setting .icon { background: #86909c; }
+    .c-ops .icon { background: #3491fa; }
+    .highlight {
+      background: #fff7e8;
+      border: 1px solid #ffe4ba;
+    }
+    .highlight:hover { background: #fff1db; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="side-item"><span class="ico"></span>我的收藏</div>
+      <div class="side-item active"><span class="ico"></span>财务共享</div>
+      <div class="side-sub active">网上报账服务</div>
+      <div class="side-sub">财务作业中心</div>
+      <div class="side-item"><span class="ico"></span>系统公共</div>
+      <div class="side-item"><span class="ico"></span>流程平台</div>
+      <div class="side-item"><span class="ico"></span>业务公共</div>
+      <div class="side-item"><span class="ico"></span>基础数据</div>
+    </aside>
+    <main class="main">
+      <div class="page-title">财务共享 / <strong>网上报账服务</strong>（按使用用途分类）</div>
+      <div class="banner">菜单已按业务用途重新分组：报账入口 → 事前申请 → 费用报销 → 借款还款 → 单据查询 → 个人设置 → 系统运维</div>
+
+      <section class="section c-entry">
+        <div class="section-head">
+          <span class="badge">01</span>
+          <h2>报账入口</h2>
+          <span class="desc">快速发起报账</span>
+        </div>
+        <div class="grid">
+          <div class="menu-item highlight"><span class="icon">入</span>我要报账</div>
+        </div>
+      </section>
+
+      <section class="section c-apply">
+        <div class="section-head">
+          <span class="badge">02</span>
+          <h2>事前申请</h2>
+          <span class="desc">费用发生前的申请单据</span>
+        </div>
+        <div class="grid">
+          <div class="menu-item"><span class="icon">申</span>差旅申请单</div>
+          <div class="menu-item"><span class="icon">申</span>业务招待申请单</div>
+          <div class="menu-item"><span class="icon">申</span>会议&amp;培训申请(不含差旅)</div>
+          <div class="menu-item"><span class="icon">申</span>其他费用申请单</div>
+          <div class="menu-item"><span class="icon">申</span>租车费用申请单</div>
+        </div>
+      </section>
+
+      <section class="section c-reimburse">
+        <div class="section-head">
+          <span class="badge">03</span>
+          <h2>费用报销</h2>
+          <span class="desc">费用发生后的报销单据</span>
+        </div>
+        <div class="grid">
+          <div class="menu-item"><span class="icon">报</span>境内差旅费报销单</div>
+          <div class="menu-item"><span class="icon">报</span>境外差旅费报销单</div>
+          <div class="menu-item"><span class="icon">报</span>业务招待报销单</div>
+          <div class="menu-item"><span class="icon">报</span>会议&amp;培训报销(不含差旅)</div>
+          <div class="menu-item"><span class="icon">报</span>车辆费用报销单</div>
+          <div class="menu-item"><span class="icon">报</span>其他费用报销单</div>
+        </div>
+      </section>
+
+      <section class="section c-loan">
+        <div class="section-head">
+          <span class="badge">04</span>
+          <h2>借款还款</h2>
+          <span class="desc">员工借款、还款与转移</span>
+        </div>
+        <div class="grid">
+          <div class="menu-item"><span class="icon">借</span>员工借款单</div>
+          <div class="menu-item"><span class="icon">还</span>员工还款单</div>
+          <div class="menu-item"><span class="icon">转</span>个人借款转移</div>
+        </div>
+      </section>
+
+      <section class="section c-query">
+        <div class="section-head">
+          <span class="badge">05</span>
+          <h2>单据查询</h2>
+          <span class="desc">个人单据与限额查询</span>
+        </div>
+        <div class="grid">
+          <div class="menu-item"><span class="icon">查</span>个人报销单查询</div>
+          <div class="menu-item"><span class="icon">查</span>个人申请单查询</div>
+          <div class="menu-item"><span class="icon">查</span>个人借款单查询</div>
+          <div class="menu-item"><span class="icon">查</span>个人报账单查询</div>
+          <div class="menu-item"><span class="icon">查</span>个人还款单查询</div>
+          <div class="menu-item"><span class="icon">查</span>个人借款转移明细查询</div>
+          <div class="menu-item"><span class="icon">查</span>个人借款限额查询</div>
+        </div>
+      </section>
+
+      <section class="section c-setting">
+        <div class="section-head">
+          <span class="badge">06</span>
+          <h2>个人设置</h2>
+          <span class="desc">委托、账户与默认组织</span>
+        </div>
+        <div class="grid">
+          <div class="menu-item"><span class="icon">设</span>个人报销委托</div>
+          <div class="menu-item"><span class="icon">设</span>个人报销账户</div>
+          <div class="menu-item"><span class="icon">设</span>个人默认组织设置</div>
+        </div>
+      </section>
+
+      <section class="section c-ops">
+        <div class="section-head">
+          <span class="badge">07</span>
+          <h2>系统运维</h2>
+          <span class="desc">运维支撑</span>
+        </div>
+        <div class="grid">
+          <div class="menu-item"><span class="icon">运</span>运维工单</div>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
