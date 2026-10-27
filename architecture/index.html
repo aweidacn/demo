@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>国资监管架构图</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "WenQuanYi Micro Hei", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+    background: #fff;
+    color: #1a1a1a;
+    padding: 12px;
+  }
+  .diagram {
+    width: 2200px;
+    border: 2px solid #2b6cb0;
+    display: grid;
+    grid-template-columns: 168px 1fr 200px;
+    background: #fafbfc;
+  }
+
+  /* ===== Side columns ===== */
+  .side {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 8px;
+    background: #f0f4f8;
+    border-right: 1px solid #c5d4e8;
+  }
+  .side.right {
+    border-right: none;
+    border-left: 1px solid #c5d4e8;
+  }
+  .side-title {
+    text-align: center;
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a365d;
+    padding: 6px 0 4px;
+    letter-spacing: 2px;
+  }
+  .group {
+    border: 1.5px solid #5b8def;
+    border-radius: 4px;
+    background: #fff;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+  }
+  .group-title {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    background: #3b82f6;
+    border-radius: 3px;
+    padding: 5px 4px;
+  }
+  .group.orange .group-title { background: #f97316; }
+  .chip {
+    text-align: center;
+    font-size: 12px;
+    padding: 7px 4px;
+    border-radius: 3px;
+    background: #dbeafe;
+    color: #1e3a8a;
+    border: 1px solid #93c5fd;
+    line-height: 1.3;
+  }
+  .chip.green {
+    background: #d1fae5;
+    color: #065f46;
+    border-color: #6ee7b7;
+  }
+  .chip.teal {
+    background: #ccfbf1;
+    color: #0f766e;
+    border-color: #5eead4;
+  }
+  .chip.orange {
+    background: #ffedd5;
+    color: #9a3412;
+    border-color: #fdba74;
+    font-weight: 700;
+  }
+  .chip.muted {
+    background: #f1f5f9;
+    color: #64748b;
+    border-color: #cbd5e1;
+  }
+  .chip.primary-mod {
+    background: #bfdbfe;
+    color: #1e40af;
+    border-color: #60a5fa;
+    font-weight: 600;
+  }
+  .chip.other-mod {
+    background: #fef3c7;
+    color: #92400e;
+    border-color: #fcd34d;
+  }
+  .arrow-hint {
+    text-align: center;
+    font-size: 11px;
+    color: #3b82f6;
+    padding: 2px 0;
+  }
+
+  /* ===== Center ===== */
+  .center {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .layer {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    border-bottom: 1px solid #c5d4e8;
+  }
+  .layer:last-child { border-bottom: none; }
+  .layer-label {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: #fff;
+    background: #2563eb;
+    padding: 8px 0;
+  }
+  .layer-label.green { background: #059669; }
+  .layer-label.teal { background: #0d9488; }
+  .layer-label.indigo { background: #4f46e5; }
+  .layer-label.slate { background: #475569; }
+  .layer-body {
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .sys-row {
+    display: grid;
+    grid-template-columns: 118px 1fr;
+    gap: 8px;
+    align-items: stretch;
+  }
+  .sys-name {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #1e3a8a;
+    background: #e0e7ff;
+    border: 1px solid #a5b4fc;
+    border-radius: 3px;
+    padding: 6px 4px;
+    line-height: 1.35;
+  }
+  .sys-name.green {
+    background: #d1fae5;
+    color: #065f46;
+    border-color: #6ee7b7;
+  }
+  .cells {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    align-content: flex-start;
+  }
+  .cell {
+    font-size: 11.5px;
+    padding: 6px 8px;
+    border-radius: 3px;
+    border: 1px solid #93c5fd;
+    background: #dbeafe;
+    color: #1e3a8a;
+    text-align: center;
+    line-height: 1.25;
+    white-space: nowrap;
+  }
+  .cell.g {
+    background: #d1fae5;
+    border-color: #6ee7b7;
+    color: #065f46;
+  }
+  .cell.b {
+    background: #bfdbfe;
+    border-color: #60a5fa;
+    color: #1e40af;
+  }
+  .cell.p {
+    background: #e0e7ff;
+    border-color: #a5b4fc;
+    color: #3730a3;
+  }
+  .cell.gray {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #475569;
+  }
+  .cell.grow { flex: 1; min-width: 120px; }
+
+  .portal-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .portal {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 14px;
+    border-radius: 4px;
+    background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+    color: #fff;
+    border: 1px solid #1d4ed8;
+    letter-spacing: 2px;
+  }
+
+  .subsys {
+    border: 1.5px solid #93c5fd;
+    border-radius: 4px;
+    background: #fff;
+    overflow: hidden;
+  }
+  .subsys-head {
+    background: #eff6ff;
+    color: #1e40af;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 8px;
+    border-bottom: 1px solid #bfdbfe;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .subsys-head .tag {
+    font-size: 10px;
+    font-weight: 600;
+    color: #64748b;
+    background: #f1f5f9;
+    border-radius: 2px;
+    padding: 1px 6px;
+  }
+  .subsys-body { padding: 6px; }
+
+  .penetrate {
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    gap: 0;
+    border: 1.5px solid #34d399;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #fff;
+  }
+  .penetrate-side {
+    background: #059669;
+    color: #fff;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    padding: 8px 0;
+  }
+  .penetrate-main { display: flex; flex-direction: column; }
+  .p-block {
+    display: grid;
+    grid-template-columns: 88px 1fr;
+    border-bottom: 1px solid #a7f3d0;
+  }
+  .p-block:last-child { border-bottom: none; }
+  .p-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #065f46;
+    background: #ecfdf5;
+    border-right: 1px solid #a7f3d0;
+    padding: 6px 4px;
+    line-height: 1.3;
+  }
+  .p-cells {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 5px;
+    align-content: flex-start;
+  }
+
+  .biz-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    padding: 5px;
+  }
+  .biz-grid .cell {
+    white-space: normal;
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .platform-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    align-items: stretch;
+  }
+  .platform-left {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .platform-right {
+    border: 1px dashed #94a3b8;
+    border-radius: 3px;
+    padding: 5px 8px;
+    background: #f8fafc;
+    min-width: 320px;
+  }
+  .platform-right .cap-title {
+    font-size: 11px;
+    color: #64748b;
+    margin-bottom: 4px;
+    text-align: center;
+  }
+  .platform-right .cells { justify-content: center; }
+
+  .data-center {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .data-box {
+    border: 1.5px solid #60a5fa;
+    border-radius: 4px;
+    background: #eff6ff;
+    padding: 8px 10px;
+    text-align: center;
+  }
+  .data-box .name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e40af;
+    margin-bottom: 3px;
+  }
+  .data-box .sub {
+    font-size: 11px;
+    color: #64748b;
+    line-height: 1.4;
+  }
+  .data-box.wide {
+    grid-column: 1 / -1;
+    background: #dbeafe;
+  }
+
+  .cloud {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 12px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #93c5fd 0%, #bfdbfe 50%, #93c5fd 100%);
+    color: #1e3a8a;
+    border: 1.5px solid #60a5fa;
+    letter-spacing: 1px;
+  }
+
+  .mid-connect {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    padding: 8px 0;
+    font-size: 11px;
+    color: #2563eb;
+    writing-mode: vertical-rl;
+    letter-spacing: 2px;
+  }
+</style>
+</head>
+<body>
+<div class="diagram">
+
+  <!-- LEFT: 数据联动 -->
+  <aside class="side">
+    <div class="side-title">数据联动</div>
+    <div class="group">
+      <div class="group-title">市级部门（预留）</div>
+      <div class="chip">市市场监管局</div>
+      <div class="chip">审计局</div>
+      <div class="chip">市纪委</div>
+      <div class="chip muted">……</div>
+    </div>
+    <div class="arrow-hint">↔ 联动</div>
+    <div class="group orange">
+      <div class="group-title">外部数据</div>
+      <div class="chip green">互联网数据</div>
+      <div class="chip green">万得数据</div>
+      <div class="chip green">天眼查数据</div>
+      <div class="chip muted">……</div>
+    </div>
+  </aside>
+
+  <!-- CENTER -->
+  <div class="center">
+
+    <!-- 展示层 -->
+    <div class="layer">
+      <div class="layer-label">展示层</div>
+      <div class="layer-body">
+        <div class="portal-row">
+          <div class="portal">国资监管门户</div>
+          <div class="portal">企业服务门户</div>
+        </div>
+
+        <div class="sys-row">
+          <div class="sys-name green">数据开放与<br/>服务体系</div>
+          <div class="cells">
+            <div class="cell g grow">行业数据</div>
+            <div class="cell g grow">宏观数据</div>
+            <div class="cell g grow">风险防控数据</div>
+            <div class="cell g grow">业务数据</div>
+          </div>
+        </div>
+
+        <div class="sys-row">
+          <div class="sys-name">决策支撑体系</div>
+          <div class="cells">
+            <div class="cell g grow">通用问答智能体</div>
+            <div class="cell g grow">审批智能体</div>
+            <div class="cell g grow">分析智能体</div>
+            <div class="cell b grow">决策驾驶舱</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 应用层 -->
+    <div class="layer">
+      <div class="layer-label green">应用层</div>
+      <div class="layer-body">
+        <div class="penetrate">
+          <div class="penetrate-side">穿透式监管体系</div>
+          <div class="penetrate-main">
+            <div class="p-block">
+              <div class="p-label">监督闭环</div>
+              <div class="p-cells">
+                <div class="cell g">疑似风险线索</div>
+                <div class="cell g">复核复验</div>
+                <div class="cell g">风险报告形成</div>
+                <div class="cell g">风险提示函发送</div>
+                <div class="cell g">风险事件检查整改</div>
+                <div class="cell g">检查整改结果反馈</div>
+              </div>
+            </div>
+            <div class="p-block">
+              <div class="p-label">风险穿透<br/>（11+N）</div>
+              <div class="p-cells">
+                <div class="cell g">过度负债</div>
+                <div class="cell g">无关多元</div>
+                <div class="cell g">多层架构</div>
+                <div class="cell g">薪酬乱象</div>
+                <div class="cell g">财务金融风险</div>
+                <div class="cell g">控股不控权和虚假控股</div>
+                <div class="cell g">融资性贸易和虚假贸易</div>
+                <div class="cell g">“捞偏门”</div>
+                <div class="cell g">靠企吃企</div>
+                <div class="cell g">资产闲置浪费</div>
+                <div class="cell g">境外企业风险</div>
+                <div class="cell g">其他风险</div>
+              </div>
+            </div>
+            <div class="p-block">
+              <div class="p-label">业务穿透<br/><span style="font-weight:600;font-size:10px;color:#047857">全链条 全过程 全要素</span></div>
+              <div class="biz-grid">
+                <div class="cell b">“三重一大”</div>
+                <div class="cell b">运营发展</div>
+                <div class="cell b">投资管理</div>
+                <div class="cell b">资金争取</div>
+                <div class="cell b">贸易管理</div>
+                <div class="cell b">债务管理</div>
+                <div class="cell b">薪酬监管</div>
+                <div class="cell b">企业信息管理</div>
+                <div class="cell b">采购监管</div>
+                <div class="cell b">合同监管</div>
+                <div class="cell b">法治合规</div>
+                <div class="cell b">招商引资</div>
+                <div class="cell b">监督追责</div>
+                <div class="cell b">经济运行（财务监管）</div>
+                <div class="cell b">资产管理</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sys-row">
+          <div class="sys-name">协同办公体系</div>
+          <div class="cells">
+            <div class="cell b grow">智能公文</div>
+            <div class="cell b grow">智能会议</div>
+            <div class="cell b grow">财务综合</div>
+            <div class="cell b grow">督查督办</div>
+            <div class="cell gray grow">……</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 平台层 -->
+    <div class="layer">
+      <div class="layer-label teal">平台层</div>
+      <div class="layer-body">
+        <div class="sys-row">
+          <div class="sys-name">支撑平台</div>
+          <div class="platform-row">
+            <div class="platform-left">
+              <div class="cell b">微服务</div>
+              <div class="cell b">消息服务</div>
+              <div class="cell b">统一认证</div>
+              <div class="cell b">智能体管理</div>
+              <div class="cell b">风险模型管理</div>
+              <div class="cell gray">……</div>
+            </div>
+            <div class="platform-right">
+              <div class="cap-title">调用数字政府基础能力</div>
+              <div class="cells">
+                <div class="cell gray">智能问答/智能体</div>
+                <div class="cell gray">智能文档</div>
+                <div class="cell gray">报表通</div>
+                <div class="cell gray">即时通讯</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 数据层 -->
+    <div class="layer">
+      <div class="layer-label indigo">数据层</div>
+      <div class="layer-body">
+        <div class="sys-row">
+          <div class="sys-name">数据中心</div>
+          <div class="data-center">
+            <div class="data-box">
+              <div class="name">数据采集交换平台</div>
+              <div class="sub">数据采集 · 安全升级 · 数据回流</div>
+            </div>
+            <div class="data-box">
+              <div class="name">统一数据共享中心</div>
+              <div class="sub">数据中台 · 五大库核心库 · 知识图谱 · 数据分析系统</div>
+            </div>
+            <div class="data-box wide">
+              <div class="name">数字化资源管理平台（湖仓一体化）</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 基础层 -->
+    <div class="layer">
+      <div class="layer-label slate">基础层</div>
+      <div class="layer-body">
+        <div class="cloud">科创云（算力 | 存储 | 网络 | 安全 | 大模型）</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: 数据对接 -->
+  <aside class="side right">
+    <div class="side-title">数据对接</div>
+    <div class="group">
+      <div class="group-title">省国资委</div>
+      <div class="chip primary-mod">数据上报</div>
+      <div class="chip orange">数据采集交换平台</div>
+    </div>
+    <div class="arrow-hint">↕ 主体穿透（全级次）</div>
+    <div class="group orange" style="flex: 1.6;">
+      <div class="group-title">市属企业</div>
+      <div class="chip primary-mod">会议管理（三重一大）</div>
+      <div class="chip primary-mod">合同管理</div>
+      <div class="chip primary-mod">人力资源管理</div>
+      <div class="chip primary-mod">采购管理</div>
+      <div class="chip other-mod">财务管理</div>
+      <div class="chip other-mod">投资管理</div>
+      <div class="chip other-mod">贸易管理</div>
+      <div class="chip other-mod">招商引资</div>
+      <div class="chip other-mod">资产管理</div>
+      <div class="chip muted">……</div>
+      <div class="chip orange">数据采集交换平台</div>
+    </div>
+  </aside>
+
+</div>
+</body>
+</html>
