@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>国资监管架构图</title>
+<!--
+  画布：2048 × 1080
+  中间架构区（原红框）宽度约为原先的 2/3，左右侧栏加宽平衡
+  使用：浏览器打开 → 改文字刷新 →「导出 PNG」或「打印 / 另存 PDF」
+-->
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", "WenQuanYi Micro Hei", "Noto Sans CJK SC", sans-serif;
+    background: #dbe4f0;
+    color: #1a1a1a;
+  }
+
+  .toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 10px 16px;
+    background: #1e293b;
+    color: #f8fafc;
+  }
+  .toolbar h1 { font-size: 14px; font-weight: 600; margin-right: auto; }
+  .toolbar .hint { font-size: 12px; color: #94a3b8; }
+  .toolbar button {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 7px 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background: #3b82f6;
+    color: #fff;
+    font-weight: 600;
+  }
+  .toolbar button:hover { background: #2563eb; }
+  .toolbar button.secondary { background: #475569; }
+  .toolbar button.secondary:hover { background: #334155; }
+  .toolbar button:disabled { opacity: 0.6; cursor: wait; }
+
+  .stage {
+    padding: 20px;
+    overflow: auto;
+    display: flex;
+    justify-content: center;
+  }
+
+  /* ===== 固定画布 2048×1080 ===== */
+  .diagram {
+    width: 2048px;
+    height: 1080px;
+    border: 2px solid #2b6cb0;
+    display: grid;
+    /* 中间区 ≈ 原宽度 2/3（原约 1832px → ~1220px）；左右加宽平衡 */
+    grid-template-columns: 410px 1220px 414px;
+    background: #f7f9fc;
+    overflow: hidden;
+  }
+
+  /* ===== 左右侧栏 ===== */
+  .side {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 12px;
+    background: #eef2f7;
+    min-height: 0;
+  }
+  .side.left { border-right: 1px solid #c5d4e8; }
+  .side.right { border-left: 1px solid #c5d4e8; }
+  .side-title {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a365d;
+    padding: 4px 0 2px;
+    letter-spacing: 3px;
+    flex-shrink: 0;
+  }
+  .group {
+    border: 1.5px solid #5b8def;
+    border-radius: 6px;
+    background: #fff;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 0;
+  }
+  .group.grow {
+    flex: 1;
+    justify-content: flex-start;
+  }
+  .group.grow .chip { flex: 0 0 auto; }
+  .group-title {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    background: #3b82f6;
+    border-radius: 4px;
+    padding: 7px 6px;
+    flex-shrink: 0;
+  }
+  .group.orange .group-title { background: #f97316; }
+  .chip {
+    text-align: center;
+    font-size: 12px;
+    padding: 8px 6px;
+    border-radius: 4px;
+    background: #dbeafe;
+    color: #1e3a8a;
+    border: 1px solid #93c5fd;
+    line-height: 1.25;
+  }
+  .chip.green {
+    background: #d1fae5;
+    color: #065f46;
+    border-color: #6ee7b7;
+  }
+  .chip.orange {
+    background: #ffedd5;
+    color: #9a3412;
+    border-color: #fdba74;
+    font-weight: 700;
+  }
+  .chip.muted {
+    background: #f1f5f9;
+    color: #64748b;
+    border-color: #cbd5e1;
+  }
+  .chip.primary-mod {
+    background: #bfdbfe;
+    color: #1e40af;
+    border-color: #60a5fa;
+    font-weight: 600;
+  }
+  .chip.other-mod {
+    background: #fef3c7;
+    color: #92400e;
+    border-color: #fcd34d;
+  }
+  .side.right .chip { padding: 6px 4px; font-size: 11.5px; }
+  .arrow-hint {
+    text-align: center;
+    font-size: 12px;
+    color: #2563eb;
+    padding: 2px 0;
+    flex-shrink: 0;
+  }
+
+  /* ===== 中间分层（收窄后的核心区） ===== */
+  .center {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    background: #fff;
+  }
+  .layer {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    border-bottom: 1px solid #c5d4e8;
+    min-height: 0;
+  }
+  .layer:last-child { border-bottom: none; }
+  /* 各层按权重分配高度；模块保持扁胶囊，空白由层内垂直居中消化 */
+  .layer.l-show { flex: 1.05 1 0; }
+  .layer.l-app  { flex: 2.35 1 0; }
+  .layer.l-plat { flex: 1.1 1 0; }
+  .layer.l-data { flex: 1.4 1 0; }
+  .layer.l-base { flex: 1.0 1 0; }
+
+  .layer-label {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: #fff;
+    background: #2563eb;
+    padding: 4px 0;
+  }
+  .layer-label.green { background: #059669; }
+  .layer-label.teal { background: #0d9488; }
+  .layer-label.indigo { background: #4f46e5; }
+  .layer-label.slate { background: #475569; }
+
+  .layer-body {
+    padding: 8px 9px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-height: 0;
+    height: 100%;
+    overflow: hidden;
+    justify-content: center;
+  }
+  .layer.l-app .layer-body {
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .sys-row {
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    gap: 6px;
+    align-items: stretch;
+    flex: 0 0 auto;
+  }
+  .sys-name {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #1e3a8a;
+    background: #e0e7ff;
+    border: 1px solid #a5b4fc;
+    border-radius: 3px;
+    padding: 5px 3px;
+    line-height: 1.3;
+  }
+  .sys-name.green {
+    background: #d1fae5;
+    color: #065f46;
+    border-color: #6ee7b7;
+  }
+  .cells {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 5px;
+    align-items: stretch;
+  }
+  .cell {
+    font-size: 11px;
+    padding: 6px 6px;
+    border-radius: 3px;
+    border: 1px solid #93c5fd;
+    background: #dbeafe;
+    color: #1e3a8a;
+    text-align: center;
+    line-height: 1.25;
+    white-space: nowrap;
+  }
+  .cell.g {
+    background: #d1fae5;
+    border-color: #6ee7b7;
+    color: #065f46;
+  }
+  .cell.b {
+    background: #bfdbfe;
+    border-color: #60a5fa;
+    color: #1e40af;
+  }
+  .cell.gray {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #475569;
+  }
+  .cell.grow {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .portal-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .portal {
+    text-align: center;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 11px 8px;
+    border-radius: 4px;
+    background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+    color: #fff;
+    border: 1px solid #1d4ed8;
+    letter-spacing: 2px;
+  }
+
+  /* 穿透式监管：整体不再强行撑满，三块行高接近 */
+  .penetrate {
+    display: grid;
+    grid-template-columns: 52px 1fr;
+    border: 1.5px solid #34d399;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #fff;
+    flex: 0 0 auto;
+  }
+  .penetrate-side {
+    background: #059669;
+    color: #fff;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 4px 0;
+  }
+  .penetrate-main {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .p-block {
+    display: grid;
+    grid-template-columns: 76px 1fr;
+    border-bottom: 1px solid #a7f3d0;
+    min-height: 0;
+    flex: 0 0 auto;
+  }
+  .p-block:last-child { border-bottom: none; }
+  .p-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #065f46;
+    background: #ecfdf5;
+    border-right: 1px solid #a7f3d0;
+    padding: 4px 2px;
+    line-height: 1.25;
+  }
+  .p-label .sub {
+    font-weight: 600;
+    font-size: 9px;
+    color: #047857;
+    margin-top: 2px;
+  }
+  .p-cells {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 5px 6px;
+    align-content: center;
+    align-items: center;
+  }
+  .p-cells .cell {
+    font-size: 10.5px;
+    padding: 5px 7px;
+  }
+
+  /* 业务穿透：与监督/风险同一扁胶囊风格；均分为 5 列、固定行高 */
+  .biz-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-auto-rows: 26px;
+    gap: 4px 5px;
+    padding: 4px 6px;
+    align-content: start;
+  }
+  .biz-grid .cell {
+    white-space: nowrap;
+    font-size: 10.5px;
+    padding: 0 4px;
+    height: 26px;
+    max-height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
+  }
+
+  .platform-row {
+    display: grid;
+    grid-template-columns: 1fr minmax(240px, 0.85fr);
+    gap: 6px;
+    align-items: stretch;
+  }
+  .platform-left {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 5px;
+  }
+  .platform-right {
+    border: 1px dashed #94a3b8;
+    border-radius: 3px;
+    padding: 5px 6px;
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .platform-right .cap-title {
+    font-size: 10px;
+    color: #64748b;
+    margin-bottom: 4px;
+    text-align: center;
+  }
+  .platform-right .cells { justify-content: center; gap: 4px; }
+  .platform-right .cell { font-size: 10.5px; padding: 5px 6px; }
+
+  .data-center {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .data-box {
+    border: 1.5px solid #60a5fa;
+    border-radius: 4px;
+    background: #eff6ff;
+    padding: 8px 8px;
+    text-align: center;
+  }
+  .data-box .name {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1e40af;
+    margin-bottom: 2px;
+  }
+  .data-box .sub {
+    font-size: 10px;
+    color: #64748b;
+    line-height: 1.35;
+  }
+  .data-box.wide {
+    grid-column: 1 / -1;
+    background: #dbeafe;
+    padding: 8px;
+  }
+
+  .cloud {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 10px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #93c5fd 0%, #bfdbfe 50%, #93c5fd 100%);
+    color: #1e3a8a;
+    border: 1.5px solid #60a5fa;
+    letter-spacing: 1px;
+  }
+
+  body.exporting .toolbar { display: none !important; }
+  body.exporting .stage { padding: 0; background: #fff; }
+  /* 截图/导出模式：仅显示 2048×1080 画布 */
+  body.shot {
+    background: #fff;
+    overflow: hidden;
+    width: 2048px;
+    height: 1080px;
+  }
+  body.shot .toolbar { display: none !important; }
+  body.shot .stage { padding: 0; margin: 0; overflow: hidden; }
+  @media print {
+    .toolbar { display: none !important; }
+    body { background: #fff; }
+    .stage { padding: 0; }
+    @page { size: 2048px 1080px; margin: 0; }
+  }
+</style>
+<script>
+// 尽早启用截图模式，避免无头截图时仍露出工具栏
+if (/\bshot=1\b/.test(location.search)) {
+  document.documentElement.classList.add('shot');
+}
+</script>
+</head>
+<body>
+
+<script>
+if (document.documentElement.classList.contains('shot')) {
+  document.body.classList.add('shot');
+}
+</script>
+
+<div class="toolbar" id="toolbar">
+  <h1>国资监管架构图 · 2048×1080</h1>
+  <span class="hint">中间架构区约为原宽度 2/3 · 编辑 HTML 后刷新预览 · 导出时隐藏工具栏</span>
+  <button type="button" id="btnExport" onclick="exportPng()">导出 PNG</button>
+  <button type="button" class="secondary" onclick="window.print()">打印 / 另存 PDF</button>
+</div>
+
+<div class="stage">
+<div class="diagram" id="diagram">
+
+  <!-- 左侧：数据联动 -->
+  <aside class="side left">
+    <div class="side-title">数据联动</div>
+    <div class="group grow">
+      <div class="group-title">市级部门（预留）</div>
+      <div class="chip">市市场监管局</div>
+      <div class="chip">审计局</div>
+      <div class="chip">市纪委</div>
+      <div class="chip muted">……</div>
+    </div>
+    <div class="arrow-hint">↔ 联动</div>
+    <div class="group grow">
+      <div class="group-title" style="background:#f97316">外部数据</div>
+      <div class="chip green">互联网数据</div>
+      <div class="chip green">万得数据</div>
+      <div class="chip green">天眼查数据</div>
+      <div class="chip muted">……</div>
+    </div>
+  </aside>
+
+  <!-- 中间：核心架构（收窄至约原宽 2/3） -->
+  <div class="center">
+
+    <!-- 展示层：仅门户 -->
+    <div class="layer l-show">
+      <div class="layer-label">展示层</div>
+      <div class="layer-body">
+        <div class="portal-row">
+          <div class="portal">国资监管门户</div>
+          <div class="portal">企业服务门户</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 应用层 -->
+    <div class="layer l-app">
+      <div class="layer-label green">应用层</div>
+      <div class="layer-body">
+        <div class="sys-row">
+          <div class="sys-name green">数据开放与<br/>服务体系</div>
+          <div class="cells">
+            <div class="cell g grow">行业数据</div>
+            <div class="cell g grow">宏观数据</div>
+            <div class="cell g grow">风险防控数据</div>
+            <div class="cell g grow">业务数据</div>
+          </div>
+        </div>
+
+        <div class="sys-row">
+          <div class="sys-name">决策支撑体系</div>
+          <div class="cells">
+            <div class="cell g grow">通用问答智能体</div>
+            <div class="cell g grow">审批智能体</div>
+            <div class="cell g grow">分析智能体</div>
+            <div class="cell b grow">决策驾驶舱</div>
+          </div>
+        </div>
+
+        <div class="penetrate">
+          <div class="penetrate-side">穿透式监管体系</div>
+          <div class="penetrate-main">
+            <div class="p-block">
+              <div class="p-label">监督闭环</div>
+              <div class="p-cells">
+                <div class="cell g">疑似风险线索</div>
+                <div class="cell g">复核复验</div>
+                <div class="cell g">风险报告形成</div>
+                <div class="cell g">风险提示函发送</div>
+                <div class="cell g">风险事件检查整改</div>
+                <div class="cell g">检查整改结果反馈</div>
+              </div>
+            </div>
+            <div class="p-block">
+              <div class="p-label">风险穿透<br/>（11+N）</div>
+              <div class="p-cells">
+                <div class="cell g">过度负债</div>
+                <div class="cell g">无关多元</div>
+                <div class="cell g">多层架构</div>
+                <div class="cell g">薪酬乱象</div>
+                <div class="cell g">财务金融风险</div>
+                <div class="cell g">控股不控权和虚假控股</div>
+                <div class="cell g">融资性贸易和虚假贸易</div>
+                <div class="cell g">“捞偏门”</div>
+                <div class="cell g">靠企吃企</div>
+                <div class="cell g">资产闲置浪费</div>
+                <div class="cell g">境外企业风险</div>
+                <div class="cell g">其他风险</div>
+              </div>
+            </div>
+            <div class="p-block">
+              <div class="p-label">业务穿透<span class="sub">全链条 全过程 全要素</span></div>
+              <div class="biz-grid">
+                <div class="cell b">“三重一大”</div>
+                <div class="cell b">运营发展</div>
+                <div class="cell b">投资管理</div>
+                <div class="cell b">资金争取</div>
+                <div class="cell b">贸易管理</div>
+                <div class="cell b">债务管理</div>
+                <div class="cell b">薪酬监管</div>
+                <div class="cell b">企业信息管理</div>
+                <div class="cell b">采购监管</div>
+                <div class="cell b">合同监管</div>
+                <div class="cell b">法治合规</div>
+                <div class="cell b">招商引资</div>
+                <div class="cell b">监督追责</div>
+                <div class="cell b">经济运行（财务监管）</div>
+                <div class="cell b">资产管理</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sys-row">
+          <div class="sys-name">协同办公体系</div>
+          <div class="cells">
+            <div class="cell b grow">智能公文</div>
+            <div class="cell b grow">智能会议</div>
+            <div class="cell b grow">财务综合</div>
+            <div class="cell b grow">督查督办</div>
+            <div class="cell gray grow">……</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 平台层 -->
+    <div class="layer l-plat">
+      <div class="layer-label teal">平台层</div>
+      <div class="layer-body">
+        <div class="sys-row">
+          <div class="sys-name">支撑平台</div>
+          <div class="platform-row">
+            <div class="platform-left">
+              <div class="cell b grow">微服务</div>
+              <div class="cell b grow">消息服务</div>
+              <div class="cell b grow">统一认证</div>
+              <div class="cell b grow">智能体管理</div>
+              <div class="cell b grow">风险模型管理</div>
+              <div class="cell gray grow">……</div>
+            </div>
+            <div class="platform-right">
+              <div class="cap-title">调用数字政府基础能力</div>
+              <div class="cells">
+                <div class="cell gray grow">智能问答/智能体</div>
+                <div class="cell gray grow">智能文档</div>
+                <div class="cell gray grow">报表通</div>
+                <div class="cell gray grow">即时通讯</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 数据层 -->
+    <div class="layer l-data">
+      <div class="layer-label indigo">数据层</div>
+      <div class="layer-body">
+        <div class="sys-row">
+          <div class="sys-name">数据中心</div>
+          <div class="data-center">
+            <div class="data-box">
+              <div class="name">数据采集交换平台</div>
+              <div class="sub">数据采集 · 安全升级 · 数据回流</div>
+            </div>
+            <div class="data-box">
+              <div class="name">统一数据共享中心</div>
+              <div class="sub">数据中台 · 五大库核心库 · 知识图谱 · 数据分析系统</div>
+            </div>
+            <div class="data-box wide">
+              <div class="name">数字化资源管理平台（湖仓一体化）</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 基础层 -->
+    <div class="layer l-base">
+      <div class="layer-label slate">基础层</div>
+      <div class="layer-body">
+        <div class="cloud">科创云（算力 | 存储 | 网络 | 安全 | 大模型）</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右侧：数据对接 -->
+  <aside class="side right">
+    <div class="side-title">数据对接</div>
+    <div class="group">
+      <div class="group-title">省国资委</div>
+      <div class="chip primary-mod">数据上报</div>
+      <div class="chip orange">数据采集交换平台</div>
+    </div>
+    <div class="arrow-hint">↕ 主体穿透（全级次）</div>
+    <div class="group grow orange">
+      <div class="group-title">市属企业</div>
+      <div class="chip primary-mod">会议管理（三重一大）</div>
+      <div class="chip primary-mod">合同管理</div>
+      <div class="chip primary-mod">人力资源管理</div>
+      <div class="chip primary-mod">采购管理</div>
+      <div class="chip other-mod">财务管理</div>
+      <div class="chip other-mod">投资管理</div>
+      <div class="chip other-mod">贸易管理</div>
+      <div class="chip other-mod">招商引资</div>
+      <div class="chip other-mod">资产管理</div>
+      <div class="chip muted">……</div>
+      <div class="chip orange">数据采集交换平台</div>
+    </div>
+  </aside>
+
+</div>
+</div>
+
+<script>
+async function exportPng() {
+  const btn = document.getElementById('btnExport');
+  const diagram = document.getElementById('diagram');
+  btn.disabled = true;
+  btn.textContent = '导出中…';
+  document.body.classList.add('exporting');
+
+  try {
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+    const width = 2048;
+    const height = 1080;
+    const scale = 2;
+
+    const clone = diagram.cloneNode(true);
+    clone.style.margin = '0';
+    const wrapper = document.createElement('div');
+    wrapper.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+    wrapper.style.cssText = 'margin:0;padding:0;background:#fff;width:2048px;height:1080px;';
+    const style = document.querySelector('style').cloneNode(true);
+    wrapper.appendChild(style);
+    wrapper.appendChild(clone);
+
+    const serialized = new XMLSerializer().serializeToString(wrapper);
+    const svg =
+      `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
+      `<foreignObject width="100%" height="100%">${serialized}</foreignObject></svg>`;
+
+    const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }));
+    const img = new Image();
+    await new Promise((resolve, reject) => {
+      img.onload = resolve;
+      img.onerror = reject;
+      img.src = url;
+    });
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width * scale;
+    canvas.height = height * scale;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.scale(scale, scale);
+    ctx.drawImage(img, 0, 0);
+    URL.revokeObjectURL(url);
+
+    const a = document.createElement('a');
+    a.download = '国资监管架构图-2048x1080.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  } catch (err) {
+    console.error(err);
+    alert('PNG 导出失败。请改用「打印 / 另存 PDF」，或使用 Chrome 打开后再试。');
+  } finally {
+    document.body.classList.remove('exporting');
+    btn.disabled = false;
+    btn.textContent = '导出 PNG';
+  }
+}
+</script>
+</body>
+</html>
