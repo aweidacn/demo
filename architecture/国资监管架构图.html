@@ -5,21 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>国资监管架构图</title>
 <!--
-  使用说明
-  1. 用浏览器直接打开本文件即可预览
-  2. 修改下方 HTML 中对应模块的文字即可调整内容
-  3. 点击「导出 PNG」下载图片；或「打印 / 另存 PDF」
-  4. 样式集中在 <style> 中，可改颜色、字号、间距
+  画布：2048 × 1080
+  中间架构区（原红框）宽度约为原先的 2/3，左右侧栏加宽平衡
+  使用：浏览器打开 → 改文字刷新 →「导出 PNG」或「打印 / 另存 PDF」
 -->
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: "Microsoft YaHei", "PingFang SC", "WenQuanYi Micro Hei", "Noto Sans CJK SC", sans-serif;
-    background: #e8eef5;
+    background: #dbe4f0;
     color: #1a1a1a;
   }
 
-  /* ===== 工具栏（导出时自动隐藏） ===== */
   .toolbar {
     position: sticky;
     top: 0;
@@ -31,18 +28,9 @@
     padding: 10px 16px;
     background: #1e293b;
     color: #f8fafc;
-    box-shadow: 0 2px 8px rgba(0,0,0,.15);
   }
-  .toolbar h1 {
-    font-size: 14px;
-    font-weight: 600;
-    margin-right: auto;
-    letter-spacing: 0.5px;
-  }
-  .toolbar .hint {
-    font-size: 12px;
-    color: #94a3b8;
-  }
+  .toolbar h1 { font-size: 14px; font-weight: 600; margin-right: auto; }
+  .toolbar .hint { font-size: 12px; color: #94a3b8; }
   .toolbar button {
     font-family: inherit;
     font-size: 13px;
@@ -55,79 +43,80 @@
     font-weight: 600;
   }
   .toolbar button:hover { background: #2563eb; }
-  .toolbar button.secondary {
-    background: #475569;
-  }
+  .toolbar button.secondary { background: #475569; }
   .toolbar button.secondary:hover { background: #334155; }
-  .toolbar button:disabled {
-    opacity: 0.6;
-    cursor: wait;
-  }
+  .toolbar button:disabled { opacity: 0.6; cursor: wait; }
+
   .stage {
-    padding: 16px;
+    padding: 20px;
     overflow: auto;
+    display: flex;
+    justify-content: center;
   }
 
-  /* ===== 架构图主体 ===== */
+  /* ===== 固定画布 2048×1080 ===== */
   .diagram {
-    width: 2200px;
-    margin: 0 auto;
+    width: 2048px;
+    height: 1080px;
     border: 2px solid #2b6cb0;
     display: grid;
-    grid-template-columns: 168px 1fr 200px;
-    background: #fafbfc;
+    /* 中间区 ≈ 原宽度 2/3（原约 1832px → ~1220px）；左右加宽平衡 */
+    grid-template-columns: 410px 1220px 414px;
+    background: #f7f9fc;
+    overflow: hidden;
   }
 
   /* ===== 左右侧栏 ===== */
   .side {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    padding: 10px 8px;
-    background: #f0f4f8;
-    border-right: 1px solid #c5d4e8;
+    gap: 8px;
+    padding: 10px 12px;
+    background: #eef2f7;
+    min-height: 0;
   }
-  .side.right {
-    border-right: none;
-    border-left: 1px solid #c5d4e8;
-  }
+  .side.left { border-right: 1px solid #c5d4e8; }
+  .side.right { border-left: 1px solid #c5d4e8; }
   .side-title {
     text-align: center;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
     color: #1a365d;
-    padding: 6px 0 4px;
-    letter-spacing: 2px;
+    padding: 4px 0 2px;
+    letter-spacing: 3px;
+    flex-shrink: 0;
   }
   .group {
     border: 1.5px solid #5b8def;
-    border-radius: 4px;
+    border-radius: 6px;
     background: #fff;
-    padding: 6px;
+    padding: 8px;
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    flex: 1;
+    gap: 6px;
+    min-height: 0;
   }
+  .group.grow { flex: 1; }
   .group-title {
     text-align: center;
     font-size: 13px;
     font-weight: 700;
     color: #fff;
     background: #3b82f6;
-    border-radius: 3px;
-    padding: 5px 4px;
+    border-radius: 4px;
+    padding: 7px 6px;
+    flex-shrink: 0;
   }
   .group.orange .group-title { background: #f97316; }
   .chip {
     text-align: center;
     font-size: 12px;
-    padding: 7px 4px;
-    border-radius: 3px;
+    padding: 8px 6px;
+    border-radius: 4px;
     background: #dbeafe;
     color: #1e3a8a;
     border: 1px solid #93c5fd;
-    line-height: 1.3;
+    line-height: 1.25;
   }
   .chip.green {
     background: #d1fae5;
@@ -145,66 +134,79 @@
     color: #64748b;
     border-color: #cbd5e1;
   }
-  /* 市属企业：主对接模块 */
   .chip.primary-mod {
     background: #bfdbfe;
     color: #1e40af;
     border-color: #60a5fa;
     font-weight: 600;
   }
-  /* 市属企业：其他模块（颜色区分） */
   .chip.other-mod {
     background: #fef3c7;
     color: #92400e;
     border-color: #fcd34d;
   }
+  .side.right .chip { padding: 6px 4px; font-size: 11.5px; }
   .arrow-hint {
     text-align: center;
-    font-size: 11px;
-    color: #3b82f6;
+    font-size: 12px;
+    color: #2563eb;
     padding: 2px 0;
+    flex-shrink: 0;
   }
 
-  /* ===== 中间分层 ===== */
+  /* ===== 中间分层（收窄后的核心区） ===== */
   .center {
     display: flex;
     flex-direction: column;
     min-width: 0;
+    min-height: 0;
+    background: #fff;
   }
   .layer {
     display: grid;
-    grid-template-columns: 36px 1fr;
+    grid-template-columns: 32px 1fr;
     border-bottom: 1px solid #c5d4e8;
+    min-height: 0;
   }
   .layer:last-child { border-bottom: none; }
+  .layer.l-show { flex: 0 0 auto; }
+  .layer.l-app { flex: 1 1 0; }
+  .layer.l-plat { flex: 0 0 auto; }
+  .layer.l-data { flex: 0 0 auto; }
+  .layer.l-base { flex: 0 0 auto; }
+  .layer.l-app .layer-body { height: 100%; }
+
   .layer-label {
     writing-mode: vertical-rl;
     text-orientation: mixed;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
-    letter-spacing: 4px;
+    letter-spacing: 3px;
     color: #fff;
     background: #2563eb;
-    padding: 8px 0;
+    padding: 4px 0;
   }
   .layer-label.green { background: #059669; }
   .layer-label.teal { background: #0d9488; }
   .layer-label.indigo { background: #4f46e5; }
   .layer-label.slate { background: #475569; }
+
   .layer-body {
-    padding: 8px 10px;
+    padding: 6px 8px;
     display: flex;
     flex-direction: column;
-    gap: 7px;
+    gap: 5px;
+    min-height: 0;
+    overflow: hidden;
   }
 
   .sys-row {
     display: grid;
-    grid-template-columns: 118px 1fr;
-    gap: 8px;
+    grid-template-columns: 96px 1fr;
+    gap: 6px;
     align-items: stretch;
   }
   .sys-name {
@@ -212,14 +214,14 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     color: #1e3a8a;
     background: #e0e7ff;
     border: 1px solid #a5b4fc;
     border-radius: 3px;
-    padding: 6px 4px;
-    line-height: 1.35;
+    padding: 4px 3px;
+    line-height: 1.3;
   }
   .sys-name.green {
     background: #d1fae5;
@@ -229,18 +231,18 @@
   .cells {
     display: flex;
     flex-wrap: wrap;
-    gap: 5px;
-    align-content: flex-start;
+    gap: 4px;
+    align-content: stretch;
   }
   .cell {
-    font-size: 11.5px;
-    padding: 6px 8px;
+    font-size: 11px;
+    padding: 5px 6px;
     border-radius: 3px;
     border: 1px solid #93c5fd;
     background: #dbeafe;
     color: #1e3a8a;
     text-align: center;
-    line-height: 1.25;
+    line-height: 1.2;
     white-space: nowrap;
   }
   .cell.g {
@@ -258,18 +260,24 @@
     border-color: #cbd5e1;
     color: #475569;
   }
-  .cell.grow { flex: 1; min-width: 120px; }
+  .cell.grow {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
   .portal-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 8px;
   }
   .portal {
     text-align: center;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
-    padding: 14px;
+    padding: 10px 8px;
     border-radius: 4px;
     background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
     color: #fff;
@@ -279,12 +287,13 @@
 
   .penetrate {
     display: grid;
-    grid-template-columns: 72px 1fr;
-    gap: 0;
+    grid-template-columns: 56px 1fr;
     border: 1.5px solid #34d399;
     border-radius: 4px;
     overflow: hidden;
     background: #fff;
+    flex: 1;
+    min-height: 0;
   }
   .penetrate-side {
     background: #059669;
@@ -294,112 +303,132 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
-    letter-spacing: 3px;
-    padding: 8px 0;
+    letter-spacing: 2px;
+    padding: 4px 0;
   }
-  .penetrate-main { display: flex; flex-direction: column; }
+  .penetrate-main {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
   .p-block {
     display: grid;
-    grid-template-columns: 88px 1fr;
+    grid-template-columns: 78px 1fr;
     border-bottom: 1px solid #a7f3d0;
+    min-height: 0;
   }
-  .p-block:last-child { border-bottom: none; }
+  .p-block:last-child { border-bottom: none; flex: 1; }
   .p-label {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
-    font-size: 11px;
+    font-size: 10.5px;
     font-weight: 700;
     color: #065f46;
     background: #ecfdf5;
     border-right: 1px solid #a7f3d0;
-    padding: 6px 4px;
-    line-height: 1.3;
+    padding: 4px 2px;
+    line-height: 1.25;
+  }
+  .p-label .sub {
+    font-weight: 600;
+    font-size: 9px;
+    color: #047857;
+    margin-top: 2px;
   }
   .p-cells {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px;
-    padding: 5px;
+    gap: 3px;
+    padding: 4px;
     align-content: flex-start;
+  }
+  .p-cells .cell {
+    font-size: 10px;
+    padding: 4px 5px;
   }
 
   .biz-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 4px;
-    padding: 5px;
+    gap: 3px;
+    padding: 4px;
+    height: 100%;
   }
   .biz-grid .cell {
     white-space: normal;
-    min-height: 32px;
+    font-size: 10.5px;
+    padding: 4px 3px;
     display: flex;
     align-items: center;
     justify-content: center;
+    line-height: 1.2;
   }
 
   .platform-row {
     display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 8px;
+    grid-template-columns: 1fr minmax(240px, 0.85fr);
+    gap: 6px;
     align-items: stretch;
   }
   .platform-left {
     display: flex;
     flex-wrap: wrap;
-    gap: 5px;
+    gap: 4px;
   }
   .platform-right {
     border: 1px dashed #94a3b8;
     border-radius: 3px;
-    padding: 5px 8px;
+    padding: 4px 6px;
     background: #f8fafc;
-    min-width: 320px;
   }
   .platform-right .cap-title {
-    font-size: 11px;
+    font-size: 10px;
     color: #64748b;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
     text-align: center;
   }
-  .platform-right .cells { justify-content: center; }
+  .platform-right .cells { justify-content: center; gap: 3px; }
+  .platform-right .cell { font-size: 10px; padding: 4px 5px; }
 
   .data-center {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    gap: 6px;
   }
   .data-box {
     border: 1.5px solid #60a5fa;
     border-radius: 4px;
     background: #eff6ff;
-    padding: 8px 10px;
+    padding: 6px 8px;
     text-align: center;
   }
   .data-box .name {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
     color: #1e40af;
-    margin-bottom: 3px;
+    margin-bottom: 2px;
   }
   .data-box .sub {
-    font-size: 11px;
+    font-size: 10px;
     color: #64748b;
-    line-height: 1.4;
+    line-height: 1.35;
   }
   .data-box.wide {
     grid-column: 1 / -1;
     background: #dbeafe;
+    padding: 7px 8px;
   }
 
   .cloud {
     text-align: center;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
-    padding: 12px;
+    padding: 8px;
     border-radius: 4px;
     background: linear-gradient(90deg, #93c5fd 0%, #bfdbfe 50%, #93c5fd 100%);
     color: #1e3a8a;
@@ -407,36 +436,53 @@
     letter-spacing: 1px;
   }
 
-  /* 导出 / 打印时隐藏工具栏 */
-  body.exporting .toolbar,
-  body.exporting .stage { padding: 0; background: #fff; }
   body.exporting .toolbar { display: none !important; }
+  body.exporting .stage { padding: 0; background: #fff; }
+  /* 截图/导出模式：仅显示 2048×1080 画布 */
+  body.shot {
+    background: #fff;
+    overflow: hidden;
+    width: 2048px;
+    height: 1080px;
+  }
+  body.shot .toolbar { display: none !important; }
+  body.shot .stage { padding: 0; margin: 0; overflow: hidden; }
   @media print {
     .toolbar { display: none !important; }
     body { background: #fff; }
     .stage { padding: 0; }
-    .diagram { margin: 0; }
+    @page { size: 2048px 1080px; margin: 0; }
   }
 </style>
+<script>
+// 尽早启用截图模式，避免无头截图时仍露出工具栏
+if (/\bshot=1\b/.test(location.search)) {
+  document.documentElement.classList.add('shot');
+}
+</script>
 </head>
 <body>
 
-<!-- ========== 工具栏 ========== -->
+<script>
+if (document.documentElement.classList.contains('shot')) {
+  document.body.classList.add('shot');
+}
+</script>
+
 <div class="toolbar" id="toolbar">
-  <h1>国资监管架构图</h1>
-  <span class="hint">编辑本 HTML 后刷新页面即可预览 · 导出时自动隐藏本工具栏</span>
+  <h1>国资监管架构图 · 2048×1080</h1>
+  <span class="hint">中间架构区约为原宽度 2/3 · 编辑 HTML 后刷新预览 · 导出时隐藏工具栏</span>
   <button type="button" id="btnExport" onclick="exportPng()">导出 PNG</button>
   <button type="button" class="secondary" onclick="window.print()">打印 / 另存 PDF</button>
 </div>
 
 <div class="stage">
-<!-- ========== 架构图（导出区域 id="diagram"） ========== -->
 <div class="diagram" id="diagram">
 
-  <!-- ===== 左侧：数据联动 ===== -->
-  <aside class="side">
+  <!-- 左侧：数据联动 -->
+  <aside class="side left">
     <div class="side-title">数据联动</div>
-    <div class="group">
+    <div class="group grow">
       <div class="group-title">市级部门（预留）</div>
       <div class="chip">市市场监管局</div>
       <div class="chip">审计局</div>
@@ -444,8 +490,8 @@
       <div class="chip muted">……</div>
     </div>
     <div class="arrow-hint">↔ 联动</div>
-    <div class="group orange">
-      <div class="group-title">外部数据</div>
+    <div class="group grow">
+      <div class="group-title" style="background:#f97316">外部数据</div>
       <div class="chip green">互联网数据</div>
       <div class="chip green">万得数据</div>
       <div class="chip green">天眼查数据</div>
@@ -453,18 +499,24 @@
     </div>
   </aside>
 
-  <!-- ===== 中间分层 ===== -->
+  <!-- 中间：核心架构（收窄至约原宽 2/3） -->
   <div class="center">
 
-    <!-- 展示层 -->
-    <div class="layer">
+    <!-- 展示层：仅门户 -->
+    <div class="layer l-show">
       <div class="layer-label">展示层</div>
       <div class="layer-body">
         <div class="portal-row">
           <div class="portal">国资监管门户</div>
           <div class="portal">企业服务门户</div>
         </div>
+      </div>
+    </div>
 
+    <!-- 应用层 -->
+    <div class="layer l-app">
+      <div class="layer-label green">应用层</div>
+      <div class="layer-body">
         <div class="sys-row">
           <div class="sys-name green">数据开放与<br/>服务体系</div>
           <div class="cells">
@@ -484,13 +536,7 @@
             <div class="cell b grow">决策驾驶舱</div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- 应用层 -->
-    <div class="layer">
-      <div class="layer-label green">应用层</div>
-      <div class="layer-body">
         <div class="penetrate">
           <div class="penetrate-side">穿透式监管体系</div>
           <div class="penetrate-main">
@@ -522,9 +568,8 @@
                 <div class="cell g">其他风险</div>
               </div>
             </div>
-            <!-- 业务穿透：仅保留指定功能 -->
             <div class="p-block">
-              <div class="p-label">业务穿透<br/><span style="font-weight:600;font-size:10px;color:#047857">全链条 全过程 全要素</span></div>
+              <div class="p-label">业务穿透<span class="sub">全链条 全过程 全要素</span></div>
               <div class="biz-grid">
                 <div class="cell b">“三重一大”</div>
                 <div class="cell b">运营发展</div>
@@ -560,27 +605,27 @@
     </div>
 
     <!-- 平台层 -->
-    <div class="layer">
+    <div class="layer l-plat">
       <div class="layer-label teal">平台层</div>
       <div class="layer-body">
         <div class="sys-row">
           <div class="sys-name">支撑平台</div>
           <div class="platform-row">
             <div class="platform-left">
-              <div class="cell b">微服务</div>
-              <div class="cell b">消息服务</div>
-              <div class="cell b">统一认证</div>
-              <div class="cell b">智能体管理</div>
-              <div class="cell b">风险模型管理</div>
-              <div class="cell gray">……</div>
+              <div class="cell b grow">微服务</div>
+              <div class="cell b grow">消息服务</div>
+              <div class="cell b grow">统一认证</div>
+              <div class="cell b grow">智能体管理</div>
+              <div class="cell b grow">风险模型管理</div>
+              <div class="cell gray grow">……</div>
             </div>
             <div class="platform-right">
               <div class="cap-title">调用数字政府基础能力</div>
               <div class="cells">
-                <div class="cell gray">智能问答/智能体</div>
-                <div class="cell gray">智能文档</div>
-                <div class="cell gray">报表通</div>
-                <div class="cell gray">即时通讯</div>
+                <div class="cell gray grow">智能问答/智能体</div>
+                <div class="cell gray grow">智能文档</div>
+                <div class="cell gray grow">报表通</div>
+                <div class="cell gray grow">即时通讯</div>
               </div>
             </div>
           </div>
@@ -589,7 +634,7 @@
     </div>
 
     <!-- 数据层 -->
-    <div class="layer">
+    <div class="layer l-data">
       <div class="layer-label indigo">数据层</div>
       <div class="layer-body">
         <div class="sys-row">
@@ -612,7 +657,7 @@
     </div>
 
     <!-- 基础层 -->
-    <div class="layer">
+    <div class="layer l-base">
       <div class="layer-label slate">基础层</div>
       <div class="layer-body">
         <div class="cloud">科创云（算力 | 存储 | 网络 | 安全 | 大模型）</div>
@@ -620,7 +665,7 @@
     </div>
   </div>
 
-  <!-- ===== 右侧：数据对接 ===== -->
+  <!-- 右侧：数据对接 -->
   <aside class="side right">
     <div class="side-title">数据对接</div>
     <div class="group">
@@ -629,14 +674,12 @@
       <div class="chip orange">数据采集交换平台</div>
     </div>
     <div class="arrow-hint">↕ 主体穿透（全级次）</div>
-    <div class="group orange" style="flex: 1.6;">
+    <div class="group grow orange">
       <div class="group-title">市属企业</div>
-      <!-- 主对接模块 -->
       <div class="chip primary-mod">会议管理（三重一大）</div>
       <div class="chip primary-mod">合同管理</div>
       <div class="chip primary-mod">人力资源管理</div>
       <div class="chip primary-mod">采购管理</div>
-      <!-- 其他模块（黄色区分） -->
       <div class="chip other-mod">财务管理</div>
       <div class="chip other-mod">投资管理</div>
       <div class="chip other-mod">贸易管理</div>
@@ -651,10 +694,6 @@
 </div>
 
 <script>
-/**
- * 导出 PNG：优先用内置 SVG foreignObject；失败则提示用打印另存 PDF。
- * 无需外网依赖，本地 file:// 打开即可用。
- */
 async function exportPng() {
   const btn = document.getElementById('btnExport');
   const diagram = document.getElementById('diagram');
@@ -663,20 +702,17 @@ async function exportPng() {
   document.body.classList.add('exporting');
 
   try {
-    // 等待一帧，确保工具栏隐藏后布局稳定
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
-    const rect = diagram.getBoundingClientRect();
-    const width = Math.ceil(diagram.scrollWidth || rect.width);
-    const height = Math.ceil(diagram.scrollHeight || rect.height);
-    const scale = 2; // 高清导出
+    const width = 2048;
+    const height = 1080;
+    const scale = 2;
 
     const clone = diagram.cloneNode(true);
     clone.style.margin = '0';
     const wrapper = document.createElement('div');
     wrapper.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
-    wrapper.style.cssText = 'margin:0;padding:0;background:#fff;';
-    // 带上样式，保证截图样式完整
+    wrapper.style.cssText = 'margin:0;padding:0;background:#fff;width:2048px;height:1080px;';
     const style = document.querySelector('style').cloneNode(true);
     wrapper.appendChild(style);
     wrapper.appendChild(clone);
@@ -686,9 +722,7 @@ async function exportPng() {
       `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
       `<foreignObject width="100%" height="100%">${serialized}</foreignObject></svg>`;
 
-    const svgBlob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(svgBlob);
-
+    const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }));
     const img = new Image();
     await new Promise((resolve, reject) => {
       img.onload = resolve;
@@ -707,12 +741,12 @@ async function exportPng() {
     URL.revokeObjectURL(url);
 
     const a = document.createElement('a');
-    a.download = '国资监管架构图.png';
+    a.download = '国资监管架构图-2048x1080.png';
     a.href = canvas.toDataURL('image/png');
     a.click();
   } catch (err) {
     console.error(err);
-    alert('PNG 导出失败（部分浏览器对本地文件有限制）。请改用「打印 / 另存 PDF」，或用 Chrome 打开本页后再试。');
+    alert('PNG 导出失败。请改用「打印 / 另存 PDF」，或使用 Chrome 打开后再试。');
   } finally {
     document.body.classList.remove('exporting');
     btn.disabled = false;
