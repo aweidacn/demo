@@ -96,7 +96,11 @@
     gap: 6px;
     min-height: 0;
   }
-  .group.grow { flex: 1; }
+  .group.grow {
+    flex: 1;
+    justify-content: flex-start;
+  }
+  .group.grow .chip { flex: 0 0 auto; }
   .group-title {
     text-align: center;
     font-size: 13px;
@@ -169,12 +173,12 @@
     min-height: 0;
   }
   .layer:last-child { border-bottom: none; }
-  .layer.l-show { flex: 0 0 auto; }
-  .layer.l-app { flex: 1 1 0; }
-  .layer.l-plat { flex: 0 0 auto; }
-  .layer.l-data { flex: 0 0 auto; }
-  .layer.l-base { flex: 0 0 auto; }
-  .layer.l-app .layer-body { height: 100%; }
+  /* 各层按权重分配高度；模块保持扁胶囊，空白由层内垂直居中消化 */
+  .layer.l-show { flex: 1.05 1 0; }
+  .layer.l-app  { flex: 2.35 1 0; }
+  .layer.l-plat { flex: 1.1 1 0; }
+  .layer.l-data { flex: 1.4 1 0; }
+  .layer.l-base { flex: 1.0 1 0; }
 
   .layer-label {
     writing-mode: vertical-rl;
@@ -195,19 +199,26 @@
   .layer-label.slate { background: #475569; }
 
   .layer-body {
-    padding: 6px 8px;
+    padding: 8px 9px;
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 7px;
     min-height: 0;
+    height: 100%;
     overflow: hidden;
+    justify-content: center;
+  }
+  .layer.l-app .layer-body {
+    justify-content: center;
+    gap: 8px;
   }
 
   .sys-row {
     display: grid;
-    grid-template-columns: 96px 1fr;
+    grid-template-columns: 92px 1fr;
     gap: 6px;
     align-items: stretch;
+    flex: 0 0 auto;
   }
   .sys-name {
     display: flex;
@@ -220,7 +231,7 @@
     background: #e0e7ff;
     border: 1px solid #a5b4fc;
     border-radius: 3px;
-    padding: 4px 3px;
+    padding: 5px 3px;
     line-height: 1.3;
   }
   .sys-name.green {
@@ -230,19 +241,19 @@
   }
   .cells {
     display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    align-content: stretch;
+    flex-wrap: nowrap;
+    gap: 5px;
+    align-items: stretch;
   }
   .cell {
     font-size: 11px;
-    padding: 5px 6px;
+    padding: 6px 6px;
     border-radius: 3px;
     border: 1px solid #93c5fd;
     background: #dbeafe;
     color: #1e3a8a;
     text-align: center;
-    line-height: 1.2;
+    line-height: 1.25;
     white-space: nowrap;
   }
   .cell.g {
@@ -277,7 +288,7 @@
     text-align: center;
     font-size: 15px;
     font-weight: 700;
-    padding: 10px 8px;
+    padding: 11px 8px;
     border-radius: 4px;
     background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
     color: #fff;
@@ -285,15 +296,15 @@
     letter-spacing: 2px;
   }
 
+  /* 穿透式监管：整体不再强行撑满，三块行高接近 */
   .penetrate {
     display: grid;
-    grid-template-columns: 56px 1fr;
+    grid-template-columns: 52px 1fr;
     border: 1.5px solid #34d399;
     border-radius: 4px;
     overflow: hidden;
     background: #fff;
-    flex: 1;
-    min-height: 0;
+    flex: 0 0 auto;
   }
   .penetrate-side {
     background: #059669;
@@ -315,11 +326,12 @@
   }
   .p-block {
     display: grid;
-    grid-template-columns: 78px 1fr;
+    grid-template-columns: 76px 1fr;
     border-bottom: 1px solid #a7f3d0;
     min-height: 0;
+    flex: 0 0 auto;
   }
-  .p-block:last-child { border-bottom: none; flex: 1; }
+  .p-block:last-child { border-bottom: none; }
   .p-label {
     display: flex;
     flex-direction: column;
@@ -343,30 +355,38 @@
   .p-cells {
     display: flex;
     flex-wrap: wrap;
-    gap: 3px;
-    padding: 4px;
-    align-content: flex-start;
+    gap: 4px;
+    padding: 5px 6px;
+    align-content: center;
+    align-items: center;
   }
   .p-cells .cell {
-    font-size: 10px;
-    padding: 4px 5px;
+    font-size: 10.5px;
+    padding: 5px 7px;
   }
 
+  /* 业务穿透：与监督/风险同一扁胶囊风格；均分为 5 列、固定行高 */
   .biz-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 3px;
-    padding: 4px;
-    height: 100%;
+    grid-auto-rows: 26px;
+    gap: 4px 5px;
+    padding: 4px 6px;
+    align-content: start;
   }
   .biz-grid .cell {
-    white-space: normal;
+    white-space: nowrap;
     font-size: 10.5px;
-    padding: 4px 3px;
+    padding: 0 4px;
+    height: 26px;
+    max-height: 26px;
     display: flex;
     align-items: center;
     justify-content: center;
-    line-height: 1.2;
+    line-height: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
   }
 
   .platform-row {
@@ -377,23 +397,26 @@
   }
   .platform-left {
     display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
+    flex-wrap: nowrap;
+    gap: 5px;
   }
   .platform-right {
     border: 1px dashed #94a3b8;
     border-radius: 3px;
-    padding: 4px 6px;
+    padding: 5px 6px;
     background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
   .platform-right .cap-title {
     font-size: 10px;
     color: #64748b;
-    margin-bottom: 3px;
+    margin-bottom: 4px;
     text-align: center;
   }
-  .platform-right .cells { justify-content: center; gap: 3px; }
-  .platform-right .cell { font-size: 10px; padding: 4px 5px; }
+  .platform-right .cells { justify-content: center; gap: 4px; }
+  .platform-right .cell { font-size: 10.5px; padding: 5px 6px; }
 
   .data-center {
     display: grid;
@@ -404,7 +427,7 @@
     border: 1.5px solid #60a5fa;
     border-radius: 4px;
     background: #eff6ff;
-    padding: 6px 8px;
+    padding: 8px 8px;
     text-align: center;
   }
   .data-box .name {
@@ -421,14 +444,14 @@
   .data-box.wide {
     grid-column: 1 / -1;
     background: #dbeafe;
-    padding: 7px 8px;
+    padding: 8px;
   }
 
   .cloud {
     text-align: center;
     font-size: 13px;
     font-weight: 700;
-    padding: 8px;
+    padding: 10px;
     border-radius: 4px;
     background: linear-gradient(90deg, #93c5fd 0%, #bfdbfe 50%, #93c5fd 100%);
     color: #1e3a8a;
